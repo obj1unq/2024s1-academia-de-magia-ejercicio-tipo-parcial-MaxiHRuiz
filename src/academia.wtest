@@ -2,16 +2,16 @@ import academia.*
 
 describe "Academia de Magia" {
 
-	const pelota = new Cosa(volumen = 3, marca = "cuchuflito", esMagico = false, esReliquia = false )
-	const escoba = new Cosa(volumen = 4, marca = "acme", esMagico = true, esReliquia = true )
-	const varita = new Cosa(volumen = 1, marca = "fenix", esMagico = true, esReliquia = false)
-	const pava = new Cosa(volumen = 2, marca = "acme", esMagico = false, esReliquia = true)
-	const lamparaAladino = new Cosa(volumen = 3, marca = "fenix", esMagico = true, esReliquia = true)
+	const pelota = new Cosa(volumen = 3, marca =  cuchuflito, esMagico = false, esReliquia = false )
+	const escoba = new Cosa(volumen = 4, marca =  acme, esMagico = true, esReliquia = true )
+	const varita = new Cosa(volumen = 1, marca =  fenix, esMagico = true, esReliquia = false)
+	const pava = new Cosa(volumen = 2, marca = acme, esMagico = false, esReliquia = true)
+	const lamparaAladino = new Cosa(volumen = 3, marca = fenix, esMagico = true, esReliquia = true)
 	
 	const baul = new Baul(volumenMaximo = 5, cosas = #{escoba}) 
-	const gabineteMagico = new GabineteMagico(cosas = #{varita}) // El precio = 6 (segunda parte)
+	const gabineteMagico = new GabineteMagico(cosas = #{varita}, precio=6) 
 	const armario = new Armario(cantidadMaxima = 2, cosas = #{pelota}) 
-	const academia = new Academia(muebles = [baul, gabineteMagico, armario]) 
+	const academia = new Academia(muebles = #{baul, gabineteMagico, armario}) 
 
 
   	test "punto 1.1 saber si está guardado algo" {
@@ -38,42 +38,47 @@ describe "Academia de Magia" {
   		armario.cantidadMaxima(1)
   		assert.equals(false, academia.puedeGuardar(pava))
   	}
+  	
+  	test "punto 1.4 saber en que muebles se puede guardar algo" {
+  		assert.equals(#{armario}, academia.muebleDondeGuardar(pava))
+  		assert.equals(#{armario,gabineteMagico}, academia.muebleDondeGuardar(lamparaAladino))
+  	}
 
-/*
- * 	test "punto 1.4 saber en que muebles se puede guardar algo" {
- * 		// TODO: Verificar que al preguntar en que muebles se puede guardar la pava se obtiene el armario
- * 		// TODO: Verificar al preguntar en que muebles se puede guardar la lámpara se obtienen el armario y el gabinete mágico
- * 	}
- */
-/*
- * 	test "punto 1.5. guardar una cosa" {
- * 		// TODO: Guardar la pava en la academia
- * 		// TODO: Verificar que la pava está guardada en la academia
- * 		// TODO: Guardar la lámpara en la academia
- * 		// TODO: Verificar que la lámpara está guardada en la academia
- * 		// TODO: Guardar la escoba en la academia (NO SE PUEDE!)
- * 		// TODO: Guardar la pelota en la academia (NO SE PUEDE!)
- * 		// TODO: Guardar la varita en la academia (NO SE PUEDE!)
- * 	}
- */
-/*
- * 	test "punto 1.5 no poder guardar una cosa por culpa de que no hay mueble" {
- * 		// TODO: Cambiar la capacidad del armario a 1
- * 		// TODO: Guardar la pava en la academia (NO SE PUEDE!)
- * 		// TODO: Verificar que la pava NO está guardada en la academia
- * 	}
- */
-/*
- * 	test "punto 2.1 utilidad" {
- * 		// TODO: Guardar la pava en el armario
- * 		// TODO: Guardar la lámpara en el gabinete mágico
- * 		var baulMagico = null // TODO: construir/obtener un baúl mágico con volumen máximo = 12 y con la escoba y la lámpara dentro
- * 		// TODO: Verificar que la utilidad del armario es 1.1
- * 		// TODO: Verificar que la utilidad del ganibete mágico es 3
- * 		// TODO: Verificar que la utilidad del baúl es 4
- * 		// TODO: Verificar que la utilidad del baúl mágico es 5
- * 	}
- */
+	test "punto 1.5. guardar una cosa" {
+		assert.throwsException({academia.guardarElemento(escoba)})
+		academia.guardarElemento(pava)
+		assert.equals(true, academia.contieneElemento(pava))
+		
+		assert.equals(false, academia.contieneElemento(lamparaAladino))
+		academia.guardarElemento(lamparaAladino)
+		assert.equals(true, academia.contieneElemento(lamparaAladino))
+		
+		
+		assert.throwsException({academia.guardarElemento(escoba)})
+		assert.throwsException({academia.guardarElemento(pelota)})
+		assert.throwsException({academia.guardarElemento(varita)})
+	}
+	
+	test "punto 1.5 no poder guardar una cosa por culpa de que no hay mueble" {
+		armario.cantidadMaxima(1)
+		assert.throwsException({academia.guardarElemento(pava)})
+		assert.throwsException({academia.guardarElemento(pava)})
+	}
+	
+	test "punto 2.1 utilidad" {
+		armario.guardar(pava)
+		assert.equals(2, armario.cantidadDeCosasGuardadas())
+		
+		gabineteMagico.guardar(lamparaAladino)
+		const baulMagico = new BaulMagico(volumenMaximo =12 , cosas = #{escoba, lamparaAladino})
+		
+		assert.equals(1.1, armario.utilidad())
+		assert.equals(3, gabineteMagico.utilidad())
+		assert.equals(4, baul.utilidad())
+		assert.equals(5, baulMagico.utilidad())
+	}
+	
+
 /*
  * 	test "punto 2.2 cosas menos utiles" {
  * 		// TODO: Guardar la pava en el armario

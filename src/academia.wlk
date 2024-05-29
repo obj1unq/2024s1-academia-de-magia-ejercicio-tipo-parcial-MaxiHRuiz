@@ -1,20 +1,19 @@
 class Academia {
-	var property muebles = []
+	var property muebles = #{}
 
 	method contieneElemento(cosa) {
 		return muebles.any{m => m.tiene(cosa)}
 	}
 	
 	method guardarElemento(cosa){
-		if(self.puedeGuardar(cosa)){
+		if(not self.puedeGuardar(cosa)){
 			self.error("el elemento nose puede guardar en la academia")
 		}
 		
-		self.muebleDondeGuardar(cosa).guardar(cosa)
+		self.muebleDondeGuardar(cosa).anyOne().guardar(cosa)
 	}
 	
 	method puedeGuardar(cosa){
-		//console.println(self.contieneElemento(cosa))
 		return not self.contieneElemento(cosa) && self.existeMuebleDondeGuardar(cosa)
 	}
 	
@@ -23,7 +22,7 @@ class Academia {
 	}
 	
 	method muebleDondeGuardar(cosa){
-		return muebles.find{m => m.puedeGuardar(cosa)}
+		return muebles.filter{m => m.puedeGuardar(cosa)}
 	}
 
 }
@@ -35,13 +34,38 @@ class Armario inherits Mueble {
 	override method puedeGuardar(cosa){
 		return super(cosa) && self.cantidadDeCosasGuardadas() < cantidadMaxima
 	}
+	
+	override method precio(){
+		return cantidadMaxima * 5
+	}
 
 }
 
 class GabineteMagico inherits Mueble {
+	var property precio = 0
 	
 	override method puedeGuardar(cosa){
 		return super(cosa) && cosa.esMagico()
+	}
+	
+	
+	override method precio(){
+		return precio
+	}
+}
+
+
+class BaulMagico inherits Baul {
+	override method utilidad(){
+		return super() + self.sumar1SiEsMagico()
+	}
+	
+	method sumar1SiEsMagico(){
+		return cosas.count({cosa => cosa.esMagico()})   
+	}
+	
+	override method precio(){
+		return super() *2
 	}
 }
 
@@ -51,6 +75,18 @@ class Baul inherits Mueble {
 	
 	override method puedeGuardar(cosa){
 		return super(cosa) && (cosa.volumen() + self.pesoTotalDeCosasGuardadas() <= volumenMaximo)
+	}
+	
+	override method precio(){
+		return volumenMaximo + 2
+	}
+	
+	override method utilidad(){
+		return super() + self.sumar2SiSonReliquias()
+	}
+	
+	method sumar2SiSonReliquias(){
+		return if (cosas.all{c => c.esReliquia()}) 2 else 0
 	}
 }
 
@@ -84,6 +120,14 @@ class Mueble {
 			self.error("no se puede guardar la cosa")
 		}
 	}
+	
+	method utilidad(){
+		console.println(cosas.sum{c => c.utilidad()} / self.precio())
+		
+		return cosas.sum{c => c.utilidad()} / self.precio()
+	}
+	
+	method precio()
 }
 
 class Cosa {
@@ -92,6 +136,37 @@ class Cosa {
 	var property volumen
 	var property esMagico
 	var property esReliquia
+	
+	
+	method utilidad(){
+		return volumen + self.utilidadSiMagica() + self.utilidadSiReliquia() + marca.utilidad(self)
+	}
+	
+	method utilidadSiMagica() {
+		return if (esMagico) 3 else 0
+	}
+	
+	method utilidadSiReliquia() {
+		return if (esReliquia) 5 else 0
+	}
 
+}
+
+object acme {
+	method utilidad(cosa){
+		return cosa.volumen() / 2
+	}
+}
+
+object fenix  {
+	method utilidad(cosa){
+		return if (cosa.esReliquia()) 3 else 0
+	}
+}
+
+object cuchuflito {
+	method utilidad(cosa){
+		return 0
+	}
 }
 
